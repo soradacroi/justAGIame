@@ -18,7 +18,13 @@ class Game:
     ```
     """
 
-    def __init__(self, debug=False, goal=[2, 2], player=[0, 0]) -> None:
+    def __init__(
+        self,
+        debug=False,
+        goal: list[int] = [2, 2],
+        player: list[int] = [0, 0],
+        num_goal: int = 100,
+    ) -> None:
         self._player_pos = [0, 0]
         self._goal_pos = [random.randrange(1, 15), random.randrange(1, 15)]
         if debug is True:
@@ -34,6 +40,11 @@ class Game:
 
         self.state[self._player_pos[0]][self._player_pos[1]] = 1
         self.state[self._goal_pos[0]][self._goal_pos[1]] = 2
+
+        if not debug:
+            for _ in range(num_goal):
+                self._goal_pos = [random.randrange(1, 15), random.randrange(1, 15)]
+                self.state[self._goal_pos[0]][self._goal_pos[1]] = 2
 
         self.level = 0
         self._game_state = "PLAYING"
@@ -57,7 +68,7 @@ class Game:
         """
         if self._game_state != "PLAYING":
             board = "[" + "\n".join(" ".join(map(str, row)) for row in self.state) + "]"
-            error = f"playing while you have {self._game_state}"
+            error = f"playing while you have {self._game_state} reset the game to play again"
             raise GameError(error)
 
         prev_pos = self._player_pos.copy()
@@ -76,7 +87,7 @@ class Game:
 
         if status == "WON":
             self.state[prev_pos[1]][prev_pos[0]] = 0
-            self.state[self._player_pos[1]][self._player_pos[0]] = 3
+            self.state[self._player_pos[1]][self._player_pos[0]] = 1
             # print(self.steps, (self._goal_pos[0], self._goal_pos[1]))
             self.score = (self._goal_pos[0] + self._goal_pos[1]) / self.steps
 
@@ -90,3 +101,9 @@ class Game:
 
     def __str__(self) -> str:
         return "[" + "\n".join(" ".join(map(str, row)) for row in self.state) + "]"
+
+    def showscore(self) -> None:
+        print(self.score)
+
+    def send_board(self) -> list:
+        return self.state
