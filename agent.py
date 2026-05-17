@@ -1,32 +1,100 @@
-from game import Game
 import random
-import numpy as np
+from game import Game
 
+q_table = {}
+
+learning_rate = 0.1
+discount_factor = 0.9
+epsilon = 1.0
+epsilon_decay = 0.995
+min_epsilon = 0.05
+episodes = 2000
+
+
+def get_state(env):
+    dx = env._goal_pos[0] - env._player_pos[0]
+    dy = env._goal_pos[1] - env._player_pos[1]
+    return (dx, dy)
+
+
+def get_q_values(state):
+    if state not in q_table:
+        q_table[state] = {1: 0.0, 2: 0.0, 3: 0.0, 4: 0.0}
+    return q_table[state]
+
+
+print("Training")
+
+for episode in range(episodes):
+    env = Game()
+    state = get_state(env)
+    done = False
+
+    while not done:
+        q_values = get_q_values(state)
+
+        if random.uniform(0, 1) < epsilon:
+            action = random.choice([1, 2, 3, 4])
+        else:
+            action = max(q_values, key=q_values.get)
+
+        _, status = env.play_step(action)
+        next_state = get_state(env)
+
+        if status == "WON":
+            reward = 100
+            done = True
+        elif status == "LOST":
+            reward = -100
+            done = True
+        else:
+            reward = -1
+
+        next_q_values = get_q_values(next_state)
+        max_future_q = max(next_q_values.values()) if not done else 0
+
+        current_q = q_values[action]
+        new_q = current_q + learning_rate * (
+            reward + discount_factor * max_future_q - current_q
+        )
+
+        q_table[state][action] = new_q
+
+        state = next_state
+
+    epsilon = max(min_epsilon, epsilon * epsilon_decay)
+
+    if (episode + 1) % 500 == 0:
+        print(f"game {episode + 1} epsilon  {epsilon:.2f}")
+
+print("Training Complete\n")
+
+print()
 env = Game()
-print(env.send_board())
-print(env.send_board(2))
-print(env.send_board(3))
+env.reset(debug=True, goal=[10, 10], player=[2, 2])
+state = get_state(env)
+done = False
+steps = 0
 
+print("Initial Board State")
+print(env)
 
-class Model:
-    def __init__(self) -> None:
-        weights = [random.randrange(-4, 4) for _ in range(19)]
+while not done and steps < 50:
+    q_values = get_q_values(state)
+    action = max(q_values, key=q_values.get)
 
-        self.weights = weights
+    print(f"\nAI chose action: {action}")
+    board, status = env.play_step(action)
+    print(board)
 
-    def play_move(self, env):
-        pass
+    state = get_state(env)
+    steps += 1
 
-    def train(self, prev_env: list, env: list, game_state: str):
-        pass
+    if status == "WON":
+        print(f"\nWON - {steps} steps")
+        done = True
+    elif status == "LOST":
+        print("\nLOST")
+        done = True
 
-
-model = Model()
-for i in range(500):
-    prev_env = env.send_board().copy()
-    action = model.play_move(env=env)  # TODO: make the Model
-    env.play_step(action=action)
-    model.train(prev_env, env.send_board(), env.check_game_state())
-
-    if env.check_game_state() != "PLAYING":
-        env.reset()
+print(env.showscore())

@@ -43,7 +43,10 @@ class Game:
         self.level = 0
         self._game_state = "PLAYING"
         self.steps = 0
-        self.score = 0
+        self.score = 0.0
+        self._min_steps = abs(self._player_pos[0] - self._goal_pos[0]) + abs(
+            self._player_pos[1] - self._goal_pos[1]
+        )
 
     def reset(self, debug=False, goal=[2, 2], player=[0, 0]):
         self.__init__(debug=debug, goal=goal, player=player)
@@ -83,8 +86,7 @@ class Game:
             self.state[prev_pos[1]][prev_pos[0]] = 0
             self.state[self._player_pos[1]][self._player_pos[0]] = 1
             # print(self.steps, (self._goal_pos[0], self._goal_pos[1]))
-            self.score = (self._goal_pos[0] + self._goal_pos[1]) / self.steps
-
+            self.score = self._min_steps / self.steps
         if status == "PLAYING":
             self.state[prev_pos[1]][prev_pos[0]] = 0
             self.state[self._player_pos[1]][self._player_pos[0]] = 1
@@ -96,8 +98,8 @@ class Game:
     def __str__(self) -> str:
         return "[" + "\n".join(" ".join(map(str, row)) for row in self.state) + "]"
 
-    def showscore(self) -> None:
-        print(self.score)
+    def showscore(self) -> float:
+        return self.score
 
     def send_board(self, dim: int = 1) -> list:
         board = []
