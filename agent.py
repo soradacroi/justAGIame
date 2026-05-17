@@ -2,7 +2,10 @@ from game import Game
 import random
 import numpy as np
 
-env = Game(num_goal=150)
+env = Game()
+print(env.send_board())
+print(env.send_board(2))
+print(env.send_board(3))
 
 
 class Model:
@@ -27,4 +30,3 @@ for i in range(500):
 
     if env.check_game_state() != "PLAYING":
         env.reset()
-

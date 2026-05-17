@@ -23,13 +23,12 @@ class Game:
         debug=False,
         goal: list[int] = [2, 2],
         player: list[int] = [0, 0],
-        num_goal: int = 100,
     ) -> None:
         self._player_pos = [0, 0]
         self._goal_pos = [random.randrange(1, 15), random.randrange(1, 15)]
         if debug is True:
-            self._goal_pos = goal
             self._player_pos = player
+            self._goal_pos = goal
 
         if self._player_pos == self._goal_pos:
             raise ZeroDivisionError(
@@ -40,11 +39,6 @@ class Game:
 
         self.state[self._player_pos[0]][self._player_pos[1]] = 1
         self.state[self._goal_pos[0]][self._goal_pos[1]] = 2
-
-        if not debug:
-            for _ in range(num_goal):
-                self._goal_pos = [random.randrange(1, 15), random.randrange(1, 15)]
-                self.state[self._goal_pos[0]][self._goal_pos[1]] = 2
 
         self.level = 0
         self._game_state = "PLAYING"
@@ -105,5 +99,12 @@ class Game:
     def showscore(self) -> None:
         print(self.score)
 
-    def send_board(self) -> list:
-        return self.state
+    def send_board(self, dim: int = 1) -> list:
+        board = []
+        if dim == 1:
+            board = [n for i in self.state for n in i]
+        elif dim == 2:
+            board = self.state
+        else:
+            raise GameError(f"dimention {dim} not supported for this game")
+        return board
