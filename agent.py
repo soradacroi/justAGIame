@@ -8,7 +8,7 @@ discount_factor = 0.9
 epsilon = 1.0
 epsilon_decay = 0.995
 min_epsilon = 0.05
-episodes = 2000
+episodes = 1500
 
 
 def get_state(env):
@@ -76,16 +76,12 @@ state = get_state(env)
 done = False
 steps = 0
 
-print("Initial Board State")
-print(env)
 
 while not done and steps < 50:
     q_values = get_q_values(state)
     action = max(q_values, key=q_values.get)
 
-    print(f"\nAI chose action: {action}")
     board, status = env.play_step(action)
-    print(board)
 
     state = get_state(env)
     steps += 1
@@ -98,3 +94,40 @@ while not done and steps < 50:
         done = True
 
 print(env.showscore())
+
+games_won = 0
+games_lost = 0
+game_scores = []
+more_steps = 0
+for _ in range(1000):
+    env = Game()
+    env.reset()
+    state = get_state(env)
+    done = False
+    steps = 0
+    while not done and steps < 100:
+        steps += 1
+        q_values = get_q_values(state)
+        action = max(q_values, key=q_values.get)
+
+        __, status = env.play_step(action)
+
+        state = get_state(env)
+
+        if status == "WON":
+            done = True
+            games_won += 1
+        elif status == "LOST":
+            done = True
+            games_lost += 1
+    if steps >= 33:
+        more_steps += 1
+    game_scores.append(env.showscore())
+
+print(games_won, games_lost, more_steps)
+print(game_scores)
+n = 0
+for i in game_scores:
+    if i == 0.0:
+        n += 1
+print(n)
