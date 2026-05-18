@@ -1,3 +1,17 @@
+"""
+in this one we have used the board only
+no checking the dx dy
+so we have incressed the epos, cause we hab
+more stuff in board now more to memorize ig
+and later make the agent take random moves
+for much longer
+changing the epsilon_decay to 0.9999 from the one from
+`agent.py`. makes the agent_2 statys random for like
+30000 games instead of like 900 games
+but as u can see its shit this method of doing this
+is shit
+"""
+
 import random
 from game import Game
 
@@ -6,16 +20,14 @@ q_table = {}
 learning_rate = 0.1
 discount_factor = 0.9
 epsilon = 1.0
-epsilon_decay = 0.995
+epsilon_decay = 0.9999
 min_epsilon = 0.05
-episodes = 1500
+episodes = 200_000
 
 
 def get_state(env: Game):
 
-    dx = env._goal_pos[0] - env._player_pos[0]
-    dy = env._goal_pos[1] - env._player_pos[1]
-    return (dx, dy)
+    return tuple(tuple(row) for row in env.state)
 
 
 def get_q_values(state):
@@ -65,7 +77,7 @@ for episode in range(episodes):
 
     epsilon = max(min_epsilon, epsilon * epsilon_decay)
 
-    if (episode + 1) % 500 == 0:
+    if (episode + 1) % 1000 == 0:
         print(f"game {episode + 1} epsilon  {epsilon:.2f}")
 
 print("Training Complete\n")
